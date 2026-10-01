@@ -32,8 +32,7 @@ All scripts are run from the repository root. Run output is written to `output/`
 |---|---|
 | `SurfaceCode/mhd2d.jl` | MHD solver core (module `MHD2D`) |
 | `SurfaceCode/patch2d.jl` | hydrodynamic core, used by the stage-3 hydro runs |
-| `SurfaceCode/background_35deg.txt`, `background_55deg.txt` | near-surface stellar backgrounds (ring colatitude 35° / 55°) |
-| `SurfaceCode/export_background.jl` | generates the background files; needs the separate Stellar2D package, so its output is provided here |
+| `SurfaceCode/background_35deg.txt`, `background_55deg.txt` | near-surface stellar backgrounds (ring colatitude 35° / 55°): a 1D mixing-length envelope with a Saha equation of state, topped by an isothermal hydrostatic layer (paper Sect. 3) |
 | `SurfaceCode/run_shocktests.jl`, `plot_shocktests.py` | Sod and Brio–Wu shock tubes (App. A) |
 | `SurfaceCode/test1_stratified_wave.jl`, `plot_wavetests.py` | driven wave in a stratified magneto-atmosphere vs. the exact solution (App. A) |
 | `SurfaceCode/test2_numdiss.jl` | numerical dissipation floor on ideal eigenmodes (App. A) |

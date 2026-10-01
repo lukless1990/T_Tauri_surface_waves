@@ -1,9 +1,9 @@
-# Stellar2D near-surface background for the SurfaceCode pilot
+# Near-surface background (MLT envelope + isothermal chromosphere) for SurfaceCode
 # star: M=9.945e+29 kg (0.5 Msun), R=1.391e+09 m (2 Rsun), B_star=1000.0 G, theta_ring=35.0 deg
 # composition X=0.700; tau=1 surface at r=1.391400e+09 m (r/Rstar=1.0000)
 # z=0 at tau=1 surface; z<0 sub-photospheric (REAL MLT envelope), z>0 chromosphere
 #   (z>0 is an ISOTHERMAL-HYDROSTATIC PLACEHOLDER at T=4000 K — replace for production)
-# ionization: H+He Saha + metal e- floor x_metal=1.0e-04 per H above T=2500 K (STELLAR2D_XMETAL to change);
+# ionization: H+He Saha + metal e- floor x_metal=1.0e-04 per H above T=2500 K;
 #   without the metal floor the H-only x_ion~1e-7 at the surface OVERestimates ambipolar damping.
 # columns: z[m]  r/Rstar  rho[kg/m3]  T[K]  P[Pa]  x_ion(ne/nH)  xi_neutral  n_e[m-3]  B_r[T]  B_th[T]  |B|[T]  V_A[m/s]  c_s[m/s]  H_p[m]
 -1.004660e+07  0.992780  1.638313e-02  1.622246e+04  1.985084e+06  1.8787e-01  8.6574e-01  1.2881e+24  8.3716e-02  2.9309e-02  8.8698e-02  6.1817e+02  1.4211e+04  3.4834e+06

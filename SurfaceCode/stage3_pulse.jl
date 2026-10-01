@@ -18,7 +18,7 @@ const Mstar = 0.5*Msun; const Rstar = 2.0*Rsun
 const gsurf = G_grav*Mstar/Rstar^2        # ≈34.3 m/s² at τ=1 (const over the thin patch)
 const γ = 5/3
 
-# --- read the background_*.txt exported by export_background.jl --------------
+# --- read the background_*.txt files (1D MLT envelope + isothermal chromosphere) --
 function read_background(file)
     data = readdlm(file; comments=true, comment_char='#')
     z = data[:,1]; ρ = data[:,3]; T = data[:,4]; P = data[:,5]   # SI
