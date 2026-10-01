@@ -221,8 +221,8 @@ varied between runs), `const` definitions at the top of the script, and a few va
 | Output directory name | — | env `RUN_LABEL` |
 | Threads | 8 | `julia -t N`; the kernel saturates at about 4–8 threads |
 
-Solver settings (Riemann solver, limiter, GLM cleaning: c_h equal to the maximum fast speed and
-damping factor 0.18 per step) live in `src/mhd2d.jl` and are shared by all runs, including the
+Solver settings (Riemann solver, limiter, GLM cleaning: c_h equal to the maximum fast speed, with ψ
+damped by exp(−0.18 c_h Δt / min(Δx, Δz)) each step) live in `src/mhd2d.jl` and are shared by all runs, including the
 solar benchmark.
 
 Other scripts:
