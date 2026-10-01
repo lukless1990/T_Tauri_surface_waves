@@ -1,0 +1,9 @@
+# run output and generated figures
+output/
+SurfaceCode/SolarRuns/run_*/
+SurfaceCode/SolarRuns/plots_*/
+SurfaceCode/Paper/Surface_Wave_paper/
+*.log
+*.png
+__pycache__/
+.DS_Store

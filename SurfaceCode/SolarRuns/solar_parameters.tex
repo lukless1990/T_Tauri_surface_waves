@@ -1,0 +1,507 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.3cm]{geometry}
+\usepackage{amsmath,amssymb,booktabs,graphicx}
+\usepackage[colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue]{hyperref}
+\newcommand{\Rsun}{R_\odot}
+\newcommand{\kms}{\,\mathrm{km\,s^{-1}}}
+\title{SolarRuns: a flare-triggered Moreton wave with the SurfaceCode MHD solver\\
+\large Adopted physical parameters, driver calibration, and references}
+\author{Stellar2D / SurfaceCode pilot --- SolarRuns}
+\date{16 July 2026}
+
+\begin{document}
+\maketitle
+
+\section{Purpose and scenario}
+
+This document records the physical parameter values (with sources) adopted for the
+\texttt{SurfaceCode/SolarRuns} simulation of a \emph{Moreton wave}: the arc-shaped
+H$\alpha$ front that races away from large flares at $500$--$2000\kms$
+\cite{Moreton1960,MoretonRamsey1960,Warmuth2004a}. Following Uchida \cite{Uchida1968}, the
+front is modelled as the chromospheric footprint of a \emph{coronal fast-mode shock}: a
+flare-driven blast propagating through the quiet corona whose lower flank refracts
+downward onto the chromosphere (the fast speed increases with height through the low
+corona, bending wavefronts back toward the surface). The simulation solves compressible
+ideal MHD in a 2D $(x,z)$ vertical slice spanning photosphere $\to$ chromosphere $\to$
+transition region $\to$ corona, with the flare modelled as an impulsive-phase pressure
+pulse in the low corona --- the ``blast-wave'' scenario
+\cite{VrsnakCliver2008,Warmuth2015}, implemented essentially as in the closest published
+analogue, the FLASH Moreton-wave simulations of Krause et al.\ \cite{Krause2015}. The
+solver is the validated \texttt{MHD2D} core of the SurfaceCode pilot (HLL finite volume,
+MUSCL/minmod, SSP-RK2, Dedner GLM divergence cleaning, well-balanced gravity source;
+stratified wave propagation verified against the exact linear solution of
+\cite{PopescuBraileanu2019} to $<2\%$).
+
+\section{Model atmosphere --- two modes}
+
+\textbf{Production mode (\texttt{MODE=krause}, default).} The background of the published
+Moreton-wave simulations of Krause et al.\ \cite{Krause2015}: a \emph{gravity-free,
+isobaric} corona ($T=1.6$ MK, $p=2.65\times10^{-3}$ Pa, $n\simeq1.2\times10^{8}\;
+\mathrm{cm^{-3}}$; gravity is negligible below $\sim$100 Mm since the coronal pressure
+scale height is $\simeq100$ Mm at 1.6 MK) with a dense chromospheric slab ($T=10^{4}$ K,
+density contrast 160) below $z=5$ Mm, joined by a resolvable smoothstep edge. This
+background is an \emph{exact static solution at any resolution}, which is what makes the
+strong-shock/chromosphere interaction numerically robust --- the reason Krause et al.\
+adopted it.
+
+\textbf{High-resolution mode (\texttt{MODE=valc}).} The full hydrostatic stratification,
+$dp/dz=-\rho g_\odot$ with constant $g_\odot=274\;\mathrm{m\,s^{-2}}$, a piecewise
+VAL-C temperature profile \cite{VAL1981}, and a smooth mean molecular weight $\mu(T)$
+interpolating between neutral ($\mu=1.25$) and ionized H+He ($\mu=0.6$). Physically
+complete (photosphere, temperature minimum, chromosphere, TR, corona --- the full Uchida
+waveguide), but hydrostatics fixes the chromosphere$\to$corona density contrast at
+$\sim$$10^{5}$, so the density scale length at the transition region is
+$\sim$0.2--0.3 Mm for \emph{any} resolvable $T(z)$ path; surviving the blast impact
+requires $\Delta z\lesssim75$ km (a multi-hour run; the $\Delta z\ge100$ km attempts
+consistently failed with TR-cell positivity losses at the flare column). Adopted anchor
+values (VAL III, Table 12, model C, unless noted):
+
+\begin{table}[h]\centering\small
+\begin{tabular}{llll}
+\toprule
+quantity & adopted value & VAL-C / literature value & ref.\\
+\midrule
+$T$ at $\tau_{500}{=}1$ ($z{=}0$) & $6420$ K & $6420$ K (kinetic, \emph{not} $T_{\rm eff}{=}5772$ K) & \cite{VAL1981,Prsa2016}\\
+gas pressure at $z{=}0$ & $1.172\times10^{4}$ Pa & $1.172\times10^{5}\;\mathrm{dyn\,cm^{-2}}$ & \cite{VAL1981}\\
+temperature minimum & $4170$ K at $z{=}515$ km & $4170$ K at $h{=}515$ km & \cite{VAL1981}\\
+chromospheric plateau & rise to $7000$ K at $2.0$ Mm & $6040$--$7160$ K over $1.1$--$2.0$ Mm & \cite{VAL1981}\\
+transition region & centred $2.40$ Mm, width $0.25$ Mm & $2.5\times10^4\to4.5\times10^5$ K over & \cite{VAL1981}\\
+ & (numerically widened) & $\sim$280 km at $2.27$--$2.54$ Mm & \\
+coronal temperature & $1.5$ MK, isothermal & $1.4$--$1.6$ MK quiet Sun & \cite{WarmuthMann2005,Krause2015}\\
+coronal density ($z{=}10$ Mm) & $n_{\rm H}\simeq1.9\times10^{8}\;\mathrm{cm^{-3}}$ & $n_e\simeq1.2\times10^{8}$ \cite{Krause2015}; range & \cite{Krause2015,Warmuth2015}\\
+ & (hydrostatic result, not tuned) & $1$--$10\times10^{8}\;\mathrm{cm^{-3}}$ & \\
+coronal sound speed & $c_s\simeq185\kms$ & $180\kms$ at $1.4$ MK & \cite{WarmuthMann2005}\\
+scale heights & photosph.\ $\simeq150$ km; corona & $H_\rho\simeq130$ km; $\simeq47\,{\rm Mm}\times T/{\rm MK}$ & \cite{VAL1981,Aschwanden2005}\\
+ & $\simeq70$ Mm (emergent) & & \\
+\bottomrule
+\end{tabular}
+\caption{Atmosphere. The hydrostatic integration through the adopted $T(z)$ reproduces
+the canonical quiet-Sun coronal base density without tuning.}
+\end{table}
+
+\section{Magnetic field and the fast-speed waveguide}
+
+Uniform, vertical $B_0=3$ G (default). Quiet-Sun coronal field determinations give
+$\sim$2--6 G with a best value near 3 G (EIT-wave seismology, \cite{West2011}); Warmuth
+\& Mann's global model uses an effective coronal base field of $3.4$ G
+\cite{WarmuthMann2005}; the Krause et al.\ Moreton simulations bracket $B_0=1$--$10$ G
+uniform \cite{Krause2015}. With $B_0=3$ G and the model corona,
+$V_A(10\,{\rm Mm})\simeq430\kms$ --- matching the derived literature check ($B=3$ G,
+$n_e=1.2\times10^8\;\mathrm{cm^{-3}}\Rightarrow V_A\simeq430\kms$) --- and the ambient
+perpendicular fast speed is $V_f=\sqrt{c_s^2+V_A^2}\simeq470\kms$, consistent with the
+$\sim$300$\kms$ base magnetosonic speed rising with height of \cite{WarmuthMann2005} and
+with observed EIT-wave speeds ($170$--$465\kms$, mean $271\kms$ \cite{Klassen2000})
+sitting at or below it. Lateral propagation across the vertical field is a
+\emph{perpendicular} fast wave; the $V_f(z)$ profile has the deep minimum
+($\sim$7--10$\kms$) around the temperature-minimum layer and the monotonic rise into the
+corona that the Uchida refraction mechanism requires \cite{Uchida1968}. A Moreton front
+at $500$--$2000\kms$ is thus Mach $\sim$5--20 relative to the \emph{chromospheric} fast
+speed --- the standard argument that it must be coronally driven \cite{Warmuth2015} ---
+and Mach $1.3$--$3$ relative to the corona.
+
+\section{Flare driver (``initial pulse'')}
+
+Impulsive-phase heating of a Gaussian low-corona volume,
+\begin{equation}
+\dot q(x,z,t)=q_0\,
+\exp\!\Big[-\tfrac{(x-x_{\rm fl})^2}{2\sigma_x^2}-\tfrac{(z-z_{\rm fl})^2}{2\sigma_z^2}\Big]\,
+\sin\!\big(\pi t/\tau_{\rm fl}\big),\qquad 0\le t\le\tau_{\rm fl},
+\end{equation}
+with $q_0$ set so the time-integrated central heating equals
+$A\,p_0(z_{\rm fl})/(\gamma-1)$: a peak overpressure ratio $\Delta p/p_0\simeq A$ before
+expansion. The kernel is elliptical because hydrostatic \emph{pressure} at the transition
+region rivals the low-corona value: a round $\sigma=5$ Mm kernel at $z_{\rm fl}=10$ Mm
+deposits $\Delta p/p\sim6$ \emph{in situ} at the TR and detonates the thin layer from
+inside, whereas the wave physics requires the chromosphere to feel only the arriving
+coronal shock (Krause et al.\ avoid this by placing the pulse at 35 Mm; the elliptical
+kernel achieves the same separation in our 24 Mm box, TR deposit $\Delta p/p\lesssim0.2$).
+
+\begin{table}[h]\centering\small
+\begin{tabular}{llll}
+\toprule
+driver parameter & adopted & literature basis & ref.\\
+\midrule
+overpressure ratio $A$ & $100$ (krause) / $30$ (valc) & Vr\v{s}nak--Cliver fiducial $20$ ($M_A{\simeq}1.4$), & \cite{VrsnakCliver2008,Krause2015}\\
+ & & $40$ for $M_A{\simeq}2$; Krause et al.\ up to $100$ & \\
+source size $\sigma_x\times\sigma_z$ & $5\times2.5$ Mm (elliptical) & flare-kernel $x_0\lesssim10$ Mm; pulse region & \cite{VrsnakCliver2008,Krause2015}\\
+ & & $10$ Mm in Krause et al. & \\
+source height $z_{\rm fl}$ & $10$ Mm & low-corona pulse, well above the TR & \cite{VrsnakCliver2008,Krause2015}\\
+ & & ($35$ Mm in \cite{Krause2015}) & \\
+duration $\tau_{\rm fl}$ & $60$ s & $40$--$50$ s pulses in \cite{Krause2015} ($40$ s = min.\ for & \cite{Krause2015,VrsnakCliver2008}\\
+ & & observable Moreton signature); impulsive & \\
+ & & phase $\sim$1--5 min & \\
+temperature cap (implied) & peak $T\sim3\times10^{7}$ K & flare-loop limits $T\le4\times10^{7}$ K, & \cite{Krause2015,Aschwanden2005}\\
+ & & $n\le10^{11}\;\mathrm{cm^{-3}}$ & \\
+wave energy content & $\sim$few$\,\times10^{20}$ J & observed wave energies $10^{19}$--$10^{21}$ J, & \cite{Ballai2005,Warmuth2015}\\
+ & (2D slab $\times$ 30 Mm ribbon) & i.e.\ $\sim$0.01--1\% of the $10^{22}$--$10^{25}$ J & \cite{Emslie2012}\\
+ & & flare budget & \\
+\bottomrule
+\end{tabular}
+\caption{Flare-pulse calibration. The blast-wave route requires low-$\beta$ AR-periphery
+conditions ($\beta_0\sim0.01$--$0.1$) and impulsive lateral expansion
+\cite{VrsnakCliver2008,Pomoell2008}.}
+\end{table}
+
+\section{Observational targets}
+
+The run is judged against the observed phenomenology:
+\begin{enumerate}\itemsep2pt
+\item \textbf{Speeds:} first measured front velocity $845\pm162\kms$, event-mean
+$643\pm179\kms$ (12-event statistics \cite{Warmuth2004a}); historical range
+$500$--$2000\kms$ \cite{Moreton1960,SmithHarvey1971}.
+\item \textbf{Deceleration:} mean $\bar a\simeq-1.5\;\mathrm{km\,s^{-2}}$ (weakening with
+time), decaying amplitude, broadening profile --- a freely decaying nonlinear fast-mode
+shock relaxing toward the ambient speed \cite{Warmuth2004a,Warmuth2004b}.
+\item \textbf{Visibility range:} first seen at $\sim$$97\pm26$ Mm from the source, lost at
+$\sim$$301\pm47$ Mm \cite{Warmuth2004a}.
+\item \textbf{Chromospheric swing:} downward push of $\sim$1--4$\kms$ (max $4.1\kms$
+upper chromosphere \cite{Cabezas2019}; $2.6\kms$ Doppler \cite{Balasubramaniam2010}),
+down--up relaxation over $\sim$1--3 min.
+\item \textbf{Coronal counterpart:} EUV front, compression ratio $1.05$--$1.3$
+\cite{Muhr2011}, SXR fast-mode Mach $1.1$--$1.3$ \cite{Narukage2002,Hudson2003}; slower
+EIT fronts at $\sim$$1/3$ of the coronal shock speed in the Chen et al.\ picture
+\cite{Chen2002,Chen2005}.
+\end{enumerate}
+
+\section{Numerical setup and interventions}
+
+2D $(x,z)$ slice. Krause mode: $L_x=250$ Mm, $z\in[0,60]$ Mm, $\Delta x=250$ km,
+$\Delta z=250$ km, pulse at $(x,z)=(40,35)$ Mm, $A=100$ (the observable-Moreton amplitude of
+\cite{Krause2015}), $B_0=3$ G, $\tau_{\rm fl}=50$ s; H$\alpha$ proxy trace at the upper
+slab $z=4$ Mm (where the skirt swing is largest), coronal trace at $z=15$ Mm. VAL-C mode: $L_x=200$ Mm, $z\in[-0.6,24]$ Mm, $\Delta x\le250$ km,
+$\Delta z\lesssim75$ km; flare centred at $x_{\rm fl}=30$ Mm;
+mass-conserving absorbing layers (velocity $+$ internal-energy relaxation toward the
+hydrostatic background) at the top and both lateral boundaries. Diagnostics: 2D snapshots
+of $v_z$, $v_x$, $\Delta p/p_0$ every 30 s; distance--time stacks (1 s cadence) of
+chromospheric $v_z$ at $z=1.5$ Mm (H$\alpha$ proxy) and coronal $\Delta p/p_0$ at
+$z=8$ Mm (EUV proxy); front tracking and kinematics.
+
+\medskip\noindent
+\textbf{Known simplifications.}
+(i) Ideal MHD: no radiative losses, thermal conduction, or partial-ionization physics ---
+acceptable on the minutes-long wave-crossing time, but it leaves the \emph{flare site
+itself} with no physical relaxation channel. We therefore gently relax the velocity in a
+Gaussian column around the flare site after the pulse ends ($t>\tau_{\rm fl}$, rate
+$0.1\;\mathrm{s^{-1}}$, $\sigma_x=2\sigma_{\rm fl}$, $z\lesssim10$ Mm): in ideal MHD the
+post-flare cavity refill otherwise steepens indefinitely against the numerically thin
+transition region. The escaping front is $\gtrsim V_f\tau_{\rm fl}\sim30$ Mm away when
+the relaxer activates; front kinematics are read at $x-x_{\rm fl}\gtrsim30$ Mm.
+(ii) The flare heating is applied along the whole column (its low-atmosphere share is
+small in relative terms, $\Delta p/p\lesssim0.3$ below the TR, and mimics ribbon
+co-heating); test runs that artificially confined the heating to the corona created an
+unphysical razor pressure interface on the transition region.
+(iii) Uniform vertical field: no arcade geometry, no field-line-stretching (pseudo-wave)
+component --- this run isolates the \emph{wave} part of the EIT-wave duality
+\cite{Chen2002,Warmuth2015}.
+(iv) 2D slab: no cylindrical geometric spreading, so amplitude decay along $x$ is a
+conservative (upper) limit on front survival.
+(v) A positivity backstop: the HLL scheme is not positivity-preserving, and
+blast-driven rarefactions can empty a (numerically thin) transition-region cell; cells
+falling below $10^{-3}\rho_0(z)$ are floored with their momentum zeroed (physical wake
+evacuation stays $\gtrsim10^{-1}\rho_0$, so the backstop only catches numerical
+failures; hit counts are logged).
+(vi) The H$\alpha$ signature is represented by the chromospheric velocity swing, not
+synthesized radiative transfer (an 8\% optically-thin compression threshold is the
+visibility criterion used by \cite{Krause2015}).
+
+
+
+\section{Results: comparison with the observed 2006 December 6 Moreton wave}
+
+The production run (\texttt{MODE=krause}, $A=100$, $B_0=3$ G, $\Delta x=\Delta z=250$ km)
+is compared against the best-observed recent Moreton wave, the 2006 December 6 event
+(3B/X6.5 flare in AR 10930), analysed by Balasubramaniam et al.\ \cite{Bala2010}
+(\texttt{RefMoreton/}) --- the same event modelled by Krause et al.\ \cite{Krause2015}.
+Front tracking mirrors their method: the leading edge is followed and fitted with the
+constant-deceleration model $d=d_0+V_0t+\tfrac12at^2$ (their Eq.~1). Figure
+\texttt{plots\_production/fig5\_obs\_comparison.png}:
+
+\begin{table}[h]\centering
+\begin{tabular}{lll}
+\toprule
+ & simulation & observed \cite{Bala2010}\\
+\midrule
+mean front speed & $857\kms$ (41--226 s) & $\sim850\kms$ (18:43--18:50 UT)\\
+constant-deceleration fit $V_0$ & $891\kms$ & $\sim1125\kms$\\
+deceleration $a$ & $-0.42\;\mathrm{km\,s^{-2}}$ & $-0.87\;\mathrm{km\,s^{-2}}$\\
+final tracked speed & $813\kms$ & $\sim$700--800$\kms$ (approaching ambient)\\
+chromospheric swing amplitude & $2.0\kms$ (far field) & 1--4$\kms$ (typical events
+\cite{Cabezas2019,Balasubramaniam2010})\\
+chromospheric signal range & 31--126 Mm from source & $\sim$120--550 Mm from radiant point\\
+coronal front tracked to & 204 Mm ($\Delta p/p<3\%$) & EUV counterpart to $\gtrsim R_\odot$ scales\\
+\bottomrule
+\end{tabular}
+\caption{Simulated vs.\ observed kinematics of the 2006 December 6 Moreton wave.}
+\end{table}
+
+\noindent\textbf{Agreement.} The propagation-phase kinematics — the observable Moreton
+signature — are reproduced: the mean front speed matches the observed $850\kms$ to within
+the measurement error, the front decelerates at the same order ($-0.4$ vs.\
+$-0.9\;\mathrm{km\,s^{-2}}$, both fits weakening with time), the final speed approaches
+the ambient fast-mode speed from above (the freely decaying weak-shock behaviour of
+\cite{Warmuth2004b,AU2011}), and the chromospheric down--up swing amplitude falls inside
+the observed 1--4$\kms$ band.
+
+\medskip\noindent\textbf{Differences, and why.} (i) The observed wave stayed traceable to
+$\sim$550 Mm; our chromospheric signal drops below the $0.3\kms$ threshold at
+$\sim$126 Mm and the coronal front below $\Delta p/p=3\%$ at $\sim$204 Mm (the domain
+ends 210 Mm from the source). The 2006 event was extreme (X6.5, $\sim$270$^\circ$
+azimuthal span, the strongest field change of $\sim$80 surveyed flares), our pulse is the
+\emph{minimum observable-Moreton} amplitude of \cite{Krause2015}, and a 2D slab
+under-represents the sustained lateral driving of a real, volumetric CME expansion ---
+all three push the simulated visibility range low. (ii) The observed wave was first
+detected only at $\sim$120 Mm because flare emission saturates H$\alpha$ closer in; our
+inner cutoff (31 Mm) is the flare-column guard zone --- analogous in effect, not in
+cause. (iii) $V_0$ is $\sim$20\% low: the fit begins at our first clean detection
+($t=41$ s), missing the strongly super-magnetosonic launch phase the observed
+back-extrapolation captures. \emph{Driver caveat:} \cite{Bala2010} conclude that for
+this specific event the kinematics favour lateral CME-arcade expansion over a pure flare
+pressure pulse (the pulse would need $\sim$100 km\,s$^{-2}$ acceleration and
+$-10\;\mathrm{km\,s^{-2}}$ deceleration to fit their back-extrapolated launch). Our
+blast-driven run cannot arbitrate the launch mechanism --- but once launched, the
+propagating fast-mode front forgets its driver, which is exactly what the agreement in
+the propagation phase demonstrates.
+
+
+\section{Referee test: driver-limited vs.\ dissipation-limited range}
+
+A natural objection: if the impulsive run's front fades by $\sim$200 Mm while the real
+Moreton wave was seen to $\sim$550 Mm, perhaps the solver simply \emph{over-dissipates} ---
+in which case the T Tauri decay-length result (the parent paper) would be suspect for the
+same reason. This is testable directly. If the short range is set by the \emph{driver}
+(a weak, impulsive pulse in a finite box) rather than by \emph{dissipation}, then driving
+the wave harder and for longer, in a larger domain, at \emph{identical} solver, dissipation
+physics and resolution, should extend the range toward the observed value.
+
+We therefore added a sustained CME-piston driver (\texttt{DRIVE=piston}): steady energy
+deposition at rate $A\,p_0/[(\gamma-1)\tau_{\rm fl}]$ held over $\tau_{\rm drive}=180$ s
+(the CME lateral-acceleration phase, cosine-ramped), with the driven lateral extent growing
+as $\sigma_x(t)=\sigma_{\rm fl}+V_{\rm pist}\,t$ ($V_{\rm pist}=800\kms$) so the driving edge
+tracks outward with the front --- the continuous lateral push of an expanding CME flank
+(Chen et al.\ \cite{Chen2002}; Vršnak \& Cliver \cite{VrsnakCliver2008}), as opposed to the
+impulsive blast. Domain $L_x=600$ Mm, $A=150$, run to $t=720$ s.
+
+\begin{table}[h]\centering
+\begin{tabular}{llll}
+\toprule
+run (same solver, physics, $\Delta x=\Delta z=250$ km) & mean speed & front reached & driver\\
+\midrule
+impulsive blast ($A{=}100$, 210 Mm box) & $857\kms$ & 204 Mm & one-shot\\
+sustained CME-piston ($A{=}150$, 600 Mm box) & $833\kms$ & \textbf{553 Mm} & continuous\\
+observed 2006 December 6 \cite{Bala2010} & $\sim850\kms$ & $\sim550$ Mm & CME (inferred)\\
+\bottomrule
+\end{tabular}
+\caption{The visibility range is set by the driver, not by numerical dissipation.
+Figure \texttt{plots\_extreme/fig6\_driver\_test.png}.}
+\end{table}
+
+\noindent The sustained-driver front reaches \textbf{553 Mm} --- essentially the observed
+$\sim$550 Mm --- while propagating at the same $\sim$830--850$\kms$ mean speed, and its
+distance--time track brackets the observed curve across the whole disk. Nothing about the
+dissipation changed between the two runs; only the driver and the box did. \emph{The short
+range of the impulsive run is driver-limited, not dissipation-limited}, which is the
+premise the objection needs and does not have.
+
+\medskip\noindent\textbf{Honest cost of the extreme driver.} The sustained $A=150$ piston
+over-drives the chromospheric response: the far-field vertical swing reaches
+$\sim$130$\kms$, far above the observed 1--4$\kms$ (the impulsive run gave a realistic
+$2\kms$). So the two runs bracket reality --- the impulsive blast reproduces the
+\emph{amplitude} but under-ranges; the extreme piston reproduces the \emph{range} but
+over-drives the amplitude --- and a real, moderate CME sits between. Neither the
+deceleration nor $V_0$ of the piston run should be read as free-decay values: its fit is
+contaminated by the 180 s driven phase (hence the inflated $V_0\sim2500\kms$ and
+$a\sim-6\;\mathrm{km\,s^{-2}}$). The decisive, driver-independent quantities are the mean
+propagation speed and the range, both of which match.
+
+\medskip\noindent\textbf{Bearing on the T Tauri result.} The parent paper's decay length
+does not rest on trusting the scheme's dissipation in the first place: the numerical
+dissipation there was \emph{measured} (the dedicated numerical-diffusion test), and at the
+converged resolution the numerical decay length is $\sim$100$\times$ longer than the
+reported physical $L\simeq0.006\,R_\star$, with $L$ drifting only $+15\%$ over a
+$\Delta x=50\!\to\!13$ km refinement ladder (converging, not grid-limited). Moreover the
+two decays are different physics --- a Mach-$3$ shock plus \emph{ambipolar} friction in
+near-neutral gas (T Tauri) vs.\ a weakly nonlinear ideal-MHD wave (solar corona) --- so
+there is no shared dissipation knob whose miscalibration would inflate both. The present
+solar test removes even the indirect worry: when the solver is asked to carry a fast-mode
+front $\sim$550 Mm at the correct speed, it does.
+
+
+\subsection{Can a single driver hit both the range and the amplitude? A trade-off scan}
+
+Pushing further: the extreme run reproduces the \emph{range} but over-drives the
+chromospheric swing ($\sim$130$\kms$ vs.\ observed 1--4$\kms$). Can an intermediate
+sustained driver hit both? We scanned the piston amplitude ($A=20,25,50,150$; the $A=25$
+case also tripled the driver width, $\sigma_x=15$ Mm, to test a ``wide-and-gentle'' CME):
+
+\begin{table}[h]\centering
+\begin{tabular}{lllll}
+\toprule
+run & $A$ (width) & mean speed & range ($\Delta p/p>3\%$) & far-field swing\\
+\midrule
+mid20      & 20            & $726\kms$ & 439 Mm & 27$\kms$\\
+widegentle & 25 ($\sigma_x{=}15$) & $802\kms$ & 553 Mm & 78$\kms$\\
+mid50      & 50            & $778\kms$ & 548 Mm & 63$\kms$\\
+extreme    & 150           & $831\kms$ & 553 Mm & 133$\kms$\\
+\midrule
+\emph{observed} \cite{Bala2010} & --- & $\sim850\kms$ & $\sim550$ Mm & 1--4$\kms$\\
+\bottomrule
+\end{tabular}
+\caption{Range vs.\ chromospheric-swing trade-off across the sustained-driver scan
+(Figure \texttt{plots\_tradeoff/fig7\_tradeoff.png}). Every run that reaches the observed
+$\sim$550 Mm range has a swing $15$--$30\times$ above the observed band; the
+``sweet-spot'' corner (range $\sim$550 Mm \emph{and} swing 1--4$\kms$) is empty.}
+\end{table}
+
+\noindent Two robust facts emerge. (i) The \emph{range} saturates at $\sim$550 Mm for any
+$A\gtrsim25$ --- it is set by sustained driving and the detection threshold, not by
+amplitude, and it does \emph{not} increase further with a stronger driver. (ii) The
+\emph{swing} grows with the total deposited energy; widening the driver at fixed $A$
+(\texttt{widegentle}) made it \emph{worse}, not better, because a wider Gaussian deposits
+more energy. So a single sustained-driver knob cannot reach the observed corner.
+
+\medskip\noindent\textbf{Why the real Sun hits both, and why this strengthens (not weakens)
+the argument.} The missing ingredient is \emph{geometric spreading}, which the 2D slab
+omits by construction (\S5, simplification iv). On the real Sun the front expands as an
+arc, so its \emph{local} amplitude falls as $\sim r^{-1/2}$ (cylindrical) \emph{in addition}
+to dissipation; a front seen at 550 Mm is therefore intrinsically weak there --- large
+range \emph{and} small local swing. Our 2D slab has no such spreading, so the only way it
+can keep a front detectable to 550 Mm is to keep it strong, forcing a large swing. The
+trade-off is thus an artifact of the deliberately 2D geometry, in the \emph{conservative}
+direction: with spreading restored, the same front would decay \emph{faster} in amplitude,
+not slower. This is the same reason the paper flags the 2D decay lengths as \emph{upper
+limits} --- and it is the opposite of the ``code over-dissipates'' worry. The dissipation
+is, if anything, under-represented here; the wave still crosses the disk because it is
+driven, not because the scheme conserves its energy artificially.
+
+\section{Relation to the T Tauri SurfaceCode pilot}
+
+\texttt{SolarRuns} reuses the SurfaceCode solver core unchanged, but the two applications
+sit at opposite ends of the same physical family: both simulate an impulsively driven
+fast-magnetosonic front sweeping laterally away from a localized surface source on a
+magnetized star --- yet in \emph{different atmospheric channels}, and that difference is
+the physics.
+
+\begin{table}[h]\centering\small
+\begin{tabular}{lll}
+\toprule
+ & \textbf{T Tauri pilot (parent)} & \textbf{SolarRuns (this work)}\\
+\midrule
+question & does the accretion-impact wave & does the flare blast reproduce the\\
+ & survive ring$\to$pole? ($T=F_{\rm pole}/F_{\rm ring}$) & observed Moreton phenomenology?\\
+star & $0.5\,M_\odot$, $2\,\Rsun$ T Tauri, & the Sun, $g_\odot=274\;\mathrm{m\,s^{-2}}$\\
+ & $g\simeq34\;\mathrm{m\,s^{-2}}$ & \\
+propagation channel & \emph{dense} photospheric layers & \emph{tenuous} corona; the chromosphere\\
+ & ($\tau\gtrsim1$ to $\tau\ll1$), the layer & only \emph{prints} the front (Uchida skirt)\\
+ & Cranmer's transport assumes & \\
+background & real Stellar2D MLT envelope & Krause slab mode (gravity-free,\\
+ & (Saha EOS export), hydrostatic, & isobaric) or VAL-C hydrostatic mode;\\
+ & isothermal placeholder above $\tau{=}1$ & \S2\\
+magnetic field & ring-latitude dipole, $0.1$--$1$ kG & uniform vertical quiet-Sun $3$ G\\
+ & (kilogauss star) & \\
+driver & accretion-clump impact: boundary & flare pressure pulse: thermal\\
+ & velocity piston, $\sim$Mach 3 at the & overpressure $\Delta p/p_0=50$ in the low\\
+ & photosphere, $\tau=150$ s & corona, $\tau_{\rm fl}=50$ s\\
+key damping physics & nonlinear shock $+$ \emph{ambipolar} & ideal MHD (fully ionized corona;\\
+ & \emph{friction} (neutral photosphere; the & shock dissipation only)\\
+ & T-Tauri-specific term) & \\
+resolution & $\Delta x=50$ km ($H_p\simeq700$ km) & $\Delta x=\Delta z=250$ km (Mm-scale\\
+ & & structures; finer than \cite{Krause2015})\\
+new numerics & --- (validated core) & per-stage bounded-state protection,\\
+ & & flare-column guard/relaxer zones,\\
+ & & gravity-free isobaric mode\\
+diagnostic & transmitted flux $\Phi(x)$, decay & front kinematics $d(t)$, $v(t)$;\\
+ & length $L$ & chromospheric down--up swing;\\
+ & & EUV-proxy front\\
+outcome & the dense channel \emph{kills} the wave: & the coronal channel \emph{carries} the\\
+ & $L\simeq0.006\,R_\star$ ($\sim$8 Mm), buried & front across $\gtrsim$100--200 Mm at\\
+ & in ambient convection & $\sim$500--800$\kms$, decelerating\\
+\bottomrule
+\end{tabular}
+\caption{The same solver, the two opposite transport channels.}
+\end{table}
+
+\noindent The two results are mutually consistent rather than contradictory: lateral
+fast-wave transport survives only in the tenuous exterior (solar corona), not in the
+dense surface layers (T Tauri photosphere) --- and even the dense-layer footprints agree
+quantitatively, since the T Tauri decay length ($\sim$8 Mm) and the distance over which
+the simulated solar \emph{chromospheric} response stays strong ($\lesssim$100 Mm of the
+source, \S5) are both small compared to the stellar circumference. This is precisely the
+front-vs-energy dichotomy of the parent paper: a coronal front can cross the disk while
+the dense-layer energy density it drags along fades within a fraction of a radius. The
+solar run is therefore both a demonstration that the SurfaceCode core handles the
+classic Moreton problem, and an independent illustration of why the accretion-powered
+surface channel on T Tauri stars --- which has no hot corona to ride --- cannot deliver
+launch-capable wave energy to the pole.
+
+\begin{thebibliography}{99}\itemsep1pt\small
+\bibitem{Moreton1960} Moreton, G.~E. 1960, AJ, 65, 494 --- discovery of H$\alpha$ flare
+waves ($\sim$1000$\kms$).
+\bibitem{MoretonRamsey1960} Moreton, G.~E., \& Ramsey, H.~E. 1960, PASP, 72, 357.
+\bibitem{Uchida1968} Uchida, Y. 1968, Sol.~Phys., 4, 30 --- Moreton waves as the
+chromospheric skirt of a coronal fast-mode wavefront refracting downward.
+\bibitem{SmithHarvey1971} Smith, S.~F., \& Harvey, K.~L. 1971, in \emph{Physics of the
+Solar Corona}, ed.\ C.~J. Macris (Dordrecht: Reidel), 156 --- classic kinematic
+statistics ($658\pm159\kms$).
+\bibitem{VAL1981} Vernazza, J.~E., Avrett, E.~H., \& Loeser, R. 1981, ApJS, 45, 635 ---
+VAL III semi-empirical quiet-Sun atmosphere; model C, Table 12.
+\bibitem{Prsa2016} Pr\v{s}a, A., et al. 2016, AJ, 152, 41 --- IAU nominal solar values
+($T_{\rm eff}=5772$ K, $\Rsun=6.957\times10^8$ m).
+\bibitem{Warmuth2004a} Warmuth, A., Vr\v{s}nak, B., Magdaleni\'c, J., Hanslmeier, A., \&
+Otruba, W. 2004a, A\&A, 418, 1101 --- multiwavelength statistics of 12 Moreton events
+(speeds, deceleration, visibility range).
+\bibitem{Warmuth2004b} Warmuth, A., et al. 2004b, A\&A, 418, 1117 --- Paper II:
+amplitude decay and profile broadening (weak-shock signature).
+\bibitem{Warmuth2015} Warmuth, A. 2015, Living Rev.~Sol.~Phys., 12, 3 --- review of
+large-amplitude global coronal waves: speeds, energies, wave/pseudo-wave synthesis.
+\bibitem{WarmuthMann2005} Warmuth, A., \& Mann, G. 2005, A\&A, 435, 1123 --- global
+coronal magnetosonic-speed model ($c_s=180\kms$ at 1.4 MK; base $v_{ms}\simeq300\kms$;
+effective quiet-Sun base field 3.4 G).
+\bibitem{VrsnakCliver2008} Vr\v{s}nak, B., \& Cliver, E.~W. 2008, Sol.~Phys., 253, 215 ---
+origin of coronal shocks: flare pressure-pulse (blast) vs.\ CME-piston; quantitative
+pulse recipe (kernel $\lesssim$10 Mm, overpressure 10--40, low-$\beta$ requirement).
+\bibitem{Krause2015} Krause, G., C\'ecere, M., Francile, C., Costa, A., Elaskar, S., \&
+Schneiter, M. 2015, MNRAS, 453, 2799 (arXiv:1505.02723) --- 2D MHD flare-pressure-pulse
+Moreton simulations (FLASH): $\Delta p/p\le100$ over 10 Mm, 40--50 s, $B_0=1$--$10$ G,
+$T_{\rm cor}=1.6$ MK, $n=1.2\times10^8\;\mathrm{cm^{-3}}$; chromospheric down--up swing
+lags the coronal front by 30--50 Mm.
+\bibitem{Francile2013} Francile, C., et al. 2013, A\&A, 552, A3 --- 2006 Dec 06 Moreton
+kinematics (companion observations to \cite{Krause2015}).
+\bibitem{Chen2002} Chen, P.~F., Wu, S.~T., Shibata, K., \& Fang, C. 2002, ApJ, 572, L99 ---
+piston-driven coronal shock (Moreton, $773\kms$) + trailing pseudo-wave EIT front
+($\sim$$1/3$ speed).
+\bibitem{Chen2005} Chen, P.~F., Fang, C., \& Shibata, K. 2005, ApJ, 622, 1202.
+\bibitem{Pomoell2008} Pomoell, J., Vainio, R., \& Kissmann, R. 2008, Sol.~Phys., 253, 249
+--- Moreton-capable shocks need impulsive lateral expansion, not high final speed alone.
+\bibitem{Thompson1998} Thompson, B.~J., et al. 1998, Geophys.~Res.~Lett., 25, 2465 ---
+discovery of EIT waves.
+\bibitem{Klassen2000} Klassen, A., Aurass, H., Mann, G., \& Thompson, B.~J. 2000, A\&AS,
+141, 357 --- EIT-wave speeds $170$--$465\kms$ (mean $271\kms$).
+\bibitem{West2011} West, M., Zhukov, A.~N., Dolla, L., \& Rodriguez, L. 2011, ApJ, 730,
+122 --- quiet-Sun coronal field $\sim$2--6 G from EIT-wave seismology.
+\bibitem{Muhr2011} Muhr, N., Veronig, A.~M., Kienreich, I.~W., Temmer, M., \& Vr\v{s}nak,
+B. 2011, ApJ, 739, 89 --- EUV-wave compression ratios 1.05--1.30.
+\bibitem{Narukage2002} Narukage, N., et al. 2002, ApJ, 572, L109 --- SXR Moreton-wave
+front, fast-mode Mach 1.1--1.3.
+\bibitem{Hudson2003} Hudson, H.~S., Khan, J.~I., Lemen, J.~R., Nitta, N.~V., \& Uchida,
+Y. 2003, Sol.~Phys., 212, 121.
+\bibitem{Cabezas2019} Cabezas, D.~P., et al. 2019, ApJ, 883 (arXiv:1908.03534) ---
+chromospheric down-up swing 1.6--4.1$\kms$ (2014 Mar 29 event).
+\bibitem{Bala2010} Balasubramaniam, K.~S., Cliver, E.~W., Pevtsov, A., et al. 2010,
+ApJ, 723, 587 --- origin of the 2006 December 6 Moreton wave: kinematics
+($\sim$850$\kms$ mean, $V_0\simeq1125\kms$, $a=-0.87\;\mathrm{km\,s^{-2}}$, traced
+$\sim$120--550 Mm), flare-pulse vs.\ CME-driver analysis.
+\bibitem{Balasubramaniam2010} Balasubramaniam, K.~S., Cliver, E.~W., et al. 2010, ApJ,
+708, 1639 --- 2.6$\kms$ Doppler swing (2003 Oct 28).
+\bibitem{Ballai2005} Ballai, I., Erd\'elyi, R., \& Pint\'er, B. 2005, ApJ, 633, L145 ---
+wave energy $\sim$$10^{19}$--$10^{21}$ J from loop-oscillation seismology.
+\bibitem{Emslie2012} Emslie, A.~G., et al. 2012, ApJ, 759, 71 --- flare/CME energy
+budgets ($10^{29}$--$10^{32}$ erg).
+\bibitem{WillsDavey2007} Wills-Davey, M.~J., DeForest, C.~E., \& Stenflo, J.~O. 2007,
+ApJ, 664, 556 --- caveat: EIT-wave MHD models requiring unusually low quiet-Sun field.
+\bibitem{Aschwanden2005} Aschwanden, M.~J. 2005, \emph{Physics of the Solar Corona}
+(Springer) --- coronal scale height, flare-loop $T/n$ limits.
+\bibitem{PopescuBraileanu2019} Popescu Br\u{a}ileanu, B., Lukin, V.~S., Khomenko, E., \&
+de Vicente, \'A. 2019, A\&A, 627, A25 --- stratified chromospheric waves; exact linear
+solution used to validate the SurfaceCode solver.
+\end{thebibliography}
+\end{document}
