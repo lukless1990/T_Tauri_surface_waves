@@ -103,6 +103,73 @@ interpolates it onto its vertical grid; this is the "stellar background" of pape
 `Paper/figscripts/make_paper_figs.py` and `make_solar_fig.py` reproduce the paper figures.
 `SolarRuns/` adapts the same solver to the 2006 December 6 solar Moreton wave (App. B).
 
+## Output
+
+### Where
+
+| Script | Output directory |
+|---|---|
+| `paper_run.jl`, `paper_run_leak.jl`, `paper_run_cont.jl` | `output/<RUN_LABEL>/` (labels: default `paper_run` / `paper_run_cont`, set with `RUN_LABEL`) |
+| `run_shocktests.jl` | `output/shocktests/` |
+| `test1_stratified_wave.jl`, `test2_numdiss.jl` | `output/wavetests/` |
+| `stage4_viz.jl` | `output/plots/surfacecode/` |
+| `calib_pulse.jl`, `stage3_pulse.jl`, `stage4_pulse.jl` | no files: results (calibrated amplitudes, fitted decay lengths) are printed to stdout; redirect to a log |
+| `SolarRuns/solar_moreton.jl` | `SurfaceCode/SolarRuns/run_<label>/`, described in `SolarRuns/README.md` |
+| `analysis/plot_*.py` | figures in `SurfaceCode/analysis/plots/` |
+
+All runs also print flushed progress to stdout (step, time, time step, peak |v_x|).
+
+### Format
+
+All files are plain text, tab-separated, readable with `numpy.loadtxt` or Julia's
+`readdlm`. Units are SI unless the column says otherwise. "Per unit length" means per metre
+in the invariant y direction, since the model is 2.5D.
+
+**T Tauri pulse runs** (`paper_run.jl`, `paper_run_leak.jl`):
+
+| File | Content |
+|---|---|
+| `meta.txt` | `key=value` lines: run parameters (`M0`, boundary drive and fast speed [km/s], `Lx_Rstar`, `dx_km`, `Hp_km`, `Nx`, `Nz`, `snap_dt_s`, `Bstar_kG`, `B0_G`, absorbing-layer settings, `tau_s`) |
+| `grid_x.txt` | cell-centre x / R⋆, length Nx |
+| `grid_z.txt` | cell-centre z / H_p, length Nz |
+| `snap_vx_NNN.txt` | lateral velocity v_x [km/s] on the full grid: an Nx × Nz matrix, row i ↔ `grid_x[i]`, column j ↔ `grid_z[j]` |
+| `snap_flux_NNN.txt` | two columns: x / R⋆, running energy flux Φ(x) [J/m] accumulated up to that snapshot |
+| `snap_times.txt` | one row per snapshot (row NNN ↔ files `_NNN`): time [s], domain peak \|v_x\| [km/s] |
+| `flux_final.txt` | as `snap_flux_NNN.txt`, at the end of the run |
+
+Snapshots are written at t = 1.5 τ (the launched pulse), then every 30 min of stellar time,
+and once at the end. Φ(x) is the lateral total-energy flux, integrated over the full height
+of the domain and over time:
+Φ(x) = ∫∫ [(E + p⋆) v_x − B_x (v·B)/μ₀] dz dt.
+
+**Vertical energy ledger** (`paper_run_leak.jl` only):
+
+| File | Content |
+|---|---|
+| `leak_NNN.txt` | five columns per x cell: x / R⋆, E_top, E_bot [J/m²], M_top, M_bot [kg/m²]: cumulative energy and mass that crossed the top (z = +3 H_p) and bottom (z = −4 H_p) boundaries above/below that cell, positive = leaving the domain. Multiply by Δx and sum over x for the totals per unit length [J/m, kg/m] |
+| `leak_final.txt` | as `leak_NNN.txt`, at the end of the run |
+| `burial_history.txt` | time [s], flux-burial point x / R⋆ (first x > 0.01 R⋆ with Φ/Φ₀ < 7.8×10⁻⁴) at each 30-min snapshot |
+| `meta.txt` | additionally `leak_ledger`, `conv_tol_per_h`, `tmax_h`, `t_cross_s` |
+
+E is the conserved MHD total energy without gravitational potential energy; the potential-energy
+flux through a boundary at height z_b is g z_b × the mass flux. `leak_final.txt` and
+`burial_history.txt` are only written when a run ends by itself (convergence or `TMAX_H`), not
+when it is interrupted; the 30-min `leak_NNN` / `snap_flux_NNN` files are always available.
+
+**Continuously driven run** (`paper_run_cont.jl`): `meta.txt`, `grid_x.txt`, `grid_z.txt`,
+`snap_vx_NNN.txt` and `snap_times.txt` as above, plus `flux_steady.txt`: x / R⋆ and the
+time-averaged, height-integrated lateral energy flux ⟨F(x)⟩ [W/m] over the trailing steady window.
+
+**Validation tests** (dimensionless code units):
+
+| File | Columns |
+|---|---|
+| `shocktests/sod.txt` | x, ρ, u, p (N_x = 200, t = 0.2) |
+| `shocktests/briowu_400.txt`, `briowu_ref.txt` | x, ρ, v_x, p, B_y (N_x = 400 and the N_x = 1600 reference, t = 0.1) |
+| `wavetests/test1_mhd.txt`, `test1_hydro.txt`, `test1_nonlinear.txt` | z, u_z numerical, u_z exact, B_x1 numerical, B_x1 exact (512 cells per wavelength) |
+| `wavetests/test1_convergence.txt` | B₀, cells per wavelength, error norms ε(u_z) and ε(B_x), minimum and maximum over height of the numerical/exact amplitude ratio (fitted per wavelength band), maximum phase error [rad] |
+| `wavetests/test2_numdiss.txt` | mode (`fast`/`alfven`), cells per wavelength, amplitude decay per period, numerical energy-flux e-folding length L_num / λ |
+
 ## Quick start
 
 ```bash
