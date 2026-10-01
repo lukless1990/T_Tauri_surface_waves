@@ -192,6 +192,45 @@ TAU_S=50 BSTAR_T=0.1 TMAX_H=15 CONV_TOL=0 RUN_LABEL=paper_run_tau50_quiet \
 and their exact arguments, see `SurfaceCode/runs/run_tau50_campaign.sh`. A production run takes
 roughly 1 h on an 8-core workstation.
 
+## Parameters
+
+The production scripts (`runs/paper_run.jl`, `paper_run_leak.jl`, `paper_run_cont.jl`) take their
+parameters from three places: environment variables and a command-line argument (for what is
+varied between runs), `const` definitions at the top of the script, and a few values set inside
+`main()`. The table names the constant or variable to look for.
+
+| Parameter | Paper value | Where to change it |
+|---|---|---|
+| Polar dipole field B⋆ | 1 kG / 0.1 kG | env `BSTAR_T` in tesla (0.1 = 1 kG, 0.01 = 0.1 kG; default 0.1). In `paper_run_cont.jl` it is `const Bstar` |
+| Driver amplitude M0 (boundary v_x = M0·c_f) | 2.90 (1 kG), 3.45 (0.1 kG) for τ = 50 s | first command-line argument; default `M0_DEFAULT = 2.63`, which is the calibration for τ = 150 s. Recalibrate with `calib_pulse.jl` whenever τ, B⋆ or the background change |
+| Driver duration τ | 50 s | env `TAU_S`. **The default is 150 s**, so set `TAU_S=50` to reproduce the paper |
+| Driver vertical extent | Gaussian, width 1.5 H_p | `zw(j)` in `main()` |
+| Continuous-driving period | 2τ | follows from `TAU_S` (`paper_run_cont.jl`) |
+| Lateral domain size | 0.1 R⋆ | `const LXFRAC` |
+| Vertical domain | z ∈ [−4, +3] H_p | `zlo = -4Hp; Lz = 7Hp` in `main()` |
+| Resolution | 24 cells per H_p (Δz ≈ 35 km), Δx = 50 km | `const CPH`: it sets both Δz = H_p/CPH and Δx = 1200 km/CPH |
+| CFL number | 0.4 | `dt = 0.4*min(g.dx,g.dz)/ch` in the time loop |
+| Run length | front transit + τ (paper_run, cont); until converged (leak) | `const TEXTRA` (multiple of the transit time); in `paper_run_leak.jl` env `TMAX_H` (hard cap, stellar hours, default 30) and `CONV_TOL` (burial drift per hour that ends the run, default 0.01; 0 disables) |
+| Ambient burial level | Φ/Φ₀ = 7.8×10⁻⁴ = (0.28/10)² | `const PHI_AMB` (`paper_run_leak.jl`, convergence check only) |
+| Snapshot cadence | 30 min | `const SNAP_DT` [s] |
+| Steady-state averaging window | 30 min | `const WIN` [s] (`paper_run_cont.jl`) |
+| Lateral absorbing layers | 40 cells, rate 0.1 s⁻¹ | `const SP_NCELL`, `SP_RATE`; env `LEFT_SPONGE=0` turns off the left layer |
+| Ring colatitude θ_ring | 35° | `θ = deg2rad(35.0)` in `main()`; also pick the matching `data/background_*deg.txt` (`read_bg(...)` in `main()`) |
+| Star (M⋆, R⋆, gravity) | 0.5 M☉, 2 R☉ | `const Mstar`, `Rstar` at the top of each script. The background file belongs to this star, so a different star needs a new background file in `data/` |
+| Adiabatic index γ | 5/3 | `const γc` |
+| Output directory name | — | env `RUN_LABEL` |
+| Threads | 8 | `julia -t N`; the kernel saturates at about 4–8 threads |
+
+Solver settings (Riemann solver, limiter, GLM cleaning: c_h equal to the maximum fast speed and
+damping factor 0.18 per step) live in `src/mhd2d.jl` and are shared by all runs, including the
+solar benchmark.
+
+Other scripts:
+- `calib_pulse.jl`: the amplitudes to test are command-line arguments (`calib_pulse.jl 2.8 2.9 3.0`); `TAU_S` and `BSTAR_T` as above.
+- `stage3_pulse.jl`: first argument is the lateral domain in R⋆ (default 0.036); `TAU_S` as above.
+- `stage4_pulse.jl`: the arguments are the resolution multipliers of the ladder (`stage4_pulse.jl 1 2 4 8`); `TAU_S` as above.
+- `SolarRuns/solar_moreton.jl`: environment variables, listed in `SolarRuns/README.md`.
+
 ## License
 
 MIT, see `LICENSE`.
