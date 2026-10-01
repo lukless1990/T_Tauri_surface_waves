@@ -6,9 +6,9 @@
 #  at the footpoint, propagated laterally, and its energy-flux decay Φ(x) measured
 #  — the MHD analog of the hydro Stage-3 result. (Ambipolar damping = Stage 5.)
 #
-#  Usage: julia SurfaceCode/stage4_pulse.jl
+#  Usage: julia SurfaceCode/runs/stage4_pulse.jl
 # ============================================================================
-include(joinpath(@__DIR__, "mhd2d.jl"))
+include(joinpath(@__DIR__,"..","src","mhd2d.jl"))
 using .MHD2D
 const M = MHD2D
 using Printf, DelimitedFiles
@@ -97,7 +97,7 @@ function decay_length(x,f; i0f=0.15,i1f=0.9)
 end
 
 if abspath(PROGRAM_FILE)==@__FILE__
-    bg=joinpath(@__DIR__,"background_35deg.txt"); Lx=0.036*Rstar
+    bg=joinpath(@__DIR__,"..","data","background_35deg.txt"); Lx=0.036*Rstar
     g,a,Hp,cf,ρ0s=build(bg; Nx=500, Lx=Lx)
     VA=sqrt((a.Bx0[M.NG+1]^2+a.Bz0^2)/(μ0*ρ0s))
     @printf("MHD atmosphere: Nx=%d Nz=%d, Lx=%.2e m (%.3f Rstar), Hp=%.0f km\n", g.Nx,g.Nz,Lx,Lx/Rstar,Hp/1e3)

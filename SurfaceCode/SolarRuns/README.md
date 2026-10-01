@@ -1,6 +1,6 @@
 # SolarRuns — a flare-triggered Moreton wave with the SurfaceCode solver
 
-Adaptation of the SurfaceCode pilot (`../mhd2d.jl`, validated explicit 2.5D MHD) from the
+Adaptation of the SurfaceCode pilot (`../src/mhd2d.jl`, validated explicit 2.5D MHD) from the
 T Tauri surface-wave problem to the **Sun**: a flare pressure pulse in the low corona
 launches a fast-mode shock whose lower flank sweeps the chromosphere — the **Moreton
 wave** scenario (Uchida 1968, blast-wave variant per Vršnak & Cliver 2008).
@@ -24,7 +24,7 @@ Two background modes (`MODE` env):
 
 | file | what |
 |---|---|
-| `solar_moreton.jl` | background builder + run script (uses `../mhd2d.jl`) |
+| `solar_moreton.jl` | background builder + run script (uses `../src/mhd2d.jl`) |
 | `plot_solar.py` | figures from a run directory |
 | `solar_parameters.tex/.pdf` | adopted values, driver calibration, references |
 | `run_<label>/` | run output: background table, 2D snapshots, distance–time traces |

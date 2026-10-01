@@ -7,9 +7,9 @@
 #  vs a WEAK (linear) pulse isolates the *shock-dissipation* decay length — the
 #  first term Cranmer omits. (MHD fast mode + ambipolar come in Stages 4–5.)
 #
-#  Usage: julia SurfaceCode/stage3_pulse.jl [Lx_frac] [M0]
+#  Usage: julia SurfaceCode/runs/stage3_pulse.jl [Lx_frac] [M0]
 # ============================================================================
-include(joinpath(@__DIR__, "patch2d.jl"))
+include(joinpath(@__DIR__,"..","src","patch2d.jl"))
 using .Patch2D: NG, Grid, Atmos, alloc, step_grav!, max_dt, IRHO, IMX, IMZ, IE, prim, pressure
 using Printf, DelimitedFiles
 
@@ -104,7 +104,7 @@ end
 # ---------------------------------------------------------------------------
 if abspath(PROGRAM_FILE) == @__FILE__
     Lxfrac = length(ARGS)≥1 ? parse(Float64,ARGS[1]) : 0.036
-    bgfile = joinpath(@__DIR__, "background_35deg.txt")
+    bgfile = joinpath(@__DIR__,"..","data","background_35deg.txt")
     Lx = Lxfrac*Rstar
     g, a, Hp, csurf, ρ0s, P0s = build_atmos(bgfile; Nx=500, Lx=Lx)
     @printf("atmosphere: Nx=%d Nz=%d, Lx=%.2e m (%.3f Rstar), Hp=%.0f km, c_s(surf)=%.1f km/s, rho_s=%.2e\n",

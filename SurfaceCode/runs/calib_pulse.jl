@@ -2,8 +2,8 @@
 # The boundary drive is M0*cf; after transmission through the ghost interface + vertical dispersion the
 # domain peak is smaller (M0=2 gave ~6.3 km/s). Sweep M0, report the domain-peak |vx| (a) at the trigger
 # snapshot t=1.5τ (the definition used for the paper's injected amplitude) and (b) the global max over the
-# launch phase. Small domain / short time — cheap. Usage: julia -t 14 SurfaceCode/calib_pulse.jl [M0 M0 ...]
-include(joinpath(@__DIR__,"mhd2d.jl")); using .MHD2D; const M=MHD2D
+# launch phase. Small domain / short time — cheap. Usage: julia -t 14 SurfaceCode/runs/calib_pulse.jl [M0 M0 ...]
+include(joinpath(@__DIR__,"..","src","mhd2d.jl")); using .MHD2D; const M=MHD2D
 using Printf, DelimitedFiles
 const Gc=6.674e-11; const Msun=1.989e30; const Rsun=6.957e8
 const Mstar=0.5*Msun; const Rstar=2.0*Rsun; const gsurf=Gc*Mstar/Rstar^2
@@ -18,7 +18,7 @@ const TAU_S = haskey(ENV,"TAU_S") ? parse(Float64,ENV["TAU_S"]) : 150.0   # driv
 
 function peak_for(M0; Lxfrac=0.03, cph=24, τ=TAU_S, tend=800.0)
     γ=γc; μ0=μ0c
-    zb,ρb,Pb=read_bg(joinpath(@__DIR__,"background_35deg.txt"))
+    zb,ρb,Pb=read_bg(joinpath(@__DIR__,"..","data","background_35deg.txt"))
     ρ0s=interp(0.,zb,ρb); P0s=interp(0.,zb,Pb); Hp=P0s/(ρ0s*gsurf)
     Lx=Lxfrac*Rstar; dxt=1e5*12/cph
     Nx=round(Int,Lx/dxt); zlo=-4Hp; Lz=7Hp; Nz=max(64,round(Int,Lz/(Hp/cph)))

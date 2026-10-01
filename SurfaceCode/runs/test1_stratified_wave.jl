@@ -42,8 +42,8 @@
 # The dampB=false rerun quantifies the reflection of the PRODUCTION sponge
 # (which damps v+eint only, leaving B untouched) — reported, not gated.
 #
-# Usage: julia -t 4 SurfaceCode/test1_stratified_wave.jl
-include(joinpath(@__DIR__,"mhd2d.jl")); using .MHD2D; const M=MHD2D
+# Usage: julia -t 4 SurfaceCode/runs/test1_stratified_wave.jl
+include(joinpath(@__DIR__,"..","src","mhd2d.jl")); using .MHD2D; const M=MHD2D
 using Printf, DelimitedFiles
 
 # Top absorbing layer, production-style (velocity+eint damped toward the background,
@@ -175,7 +175,7 @@ function run_case(; B00=1.0, cpl=64, amp=1e-4, dampB=true, dump=nothing)
      rmin=rmin, rmax=rmax, dφmax=dφmax, bandz=bandz, bandr=bandr, bandA2=bandA2, V=V, H=H, kw=kw, a=sqrt(a2), γ=γ)
 end
 
-outdir=joinpath(@__DIR__,"..","output","wavetests"); mkpath(outdir)
+outdir=joinpath(@__DIR__,"..","..","output","wavetests"); mkpath(outdir)
 println("TEST 1 — stratified-atmosphere wave vs exact solution")
 println("  (single-fluid limit of Popescu Braileanu et al. 2019 Sect. 5)")
 println("  PASS: static balance ~1e-16; eps(u_z) monotone-decreasing along the ladder, <2% at the finest rung\n")

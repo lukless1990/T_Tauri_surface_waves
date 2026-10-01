@@ -2,7 +2,7 @@ import numpy as np, matplotlib; matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.colors import TwoSlopeNorm
 import os
-d=os.path.join(os.path.dirname(__file__),"..","output","plots","surfacecode")   # viz data (gitignored)
+d=os.path.join(os.path.dirname(__file__),"..","..","output","plots","surfacecode")   # viz data (gitignored)
 outd=os.path.join(os.path.dirname(__file__),"plots"); os.makedirs(outd,exist_ok=True)  # figures (tracked)
 x=np.loadtxt(os.path.join(d,"viz_flux.txt"))[:,0]
 phi=np.loadtxt(os.path.join(d,"viz_flux.txt"))[:,1]

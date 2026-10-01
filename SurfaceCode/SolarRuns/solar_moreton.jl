@@ -1,6 +1,6 @@
 # ============================================================================
 #  solar_moreton.jl — SurfaceCode/SolarRuns: a flare-triggered Moreton wave on
-#  the quiet Sun, run with the validated MHD2D solver core (../mhd2d.jl).
+#  the quiet Sun, run with the validated MHD2D solver core (../src/mhd2d.jl).
 #
 #  Scenario (blast-wave variant; all values + references in solar_parameters.pdf):
 #  an impulsive flare pressure pulse in the low corona launches a fast-mode shock;
@@ -29,7 +29,7 @@
 #     env: MODE (krause|valc), A_PULSE, B0_G, THETA_B_DEG, Z_FL_MM, TAU_FL_S,
 #          LX_MM, LZ_MM, DX_KM, DZ_KM, TEND_S, RUN_LABEL, ...(see getf calls)
 # ============================================================================
-include(joinpath(@__DIR__,"..","mhd2d.jl")); using .MHD2D; const M=MHD2D
+include(joinpath(@__DIR__,"..","src","mhd2d.jl")); using .MHD2D; const M=MHD2D
 using Printf, DelimitedFiles
 
 # --- physical constants ------------------------------------------------------

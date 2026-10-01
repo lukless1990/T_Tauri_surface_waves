@@ -7,8 +7,8 @@
 #   Diagnostic: over a trailing window [tend−WIN, tend] (near-field already steady), accumulate the
 #   time-averaged energy flux ⟨F(x)⟩ = (1/T_win)∫F dt.  Also dumps 2D vx snapshots every 30 min.
 #
-# Usage: julia -t 14 SurfaceCode/paper_run_cont.jl [M0]
-include(joinpath(@__DIR__,"mhd2d.jl")); using .MHD2D; const M=MHD2D
+# Usage: julia -t 14 SurfaceCode/runs/paper_run_cont.jl [M0]
+include(joinpath(@__DIR__,"..","src","mhd2d.jl")); using .MHD2D; const M=MHD2D
 using Printf, DelimitedFiles
 using Base.Threads: @threads
 const Gc=6.674e-11; const Msun=1.989e30; const Rsun=6.957e8
@@ -29,7 +29,7 @@ function interp(xq,x,y); xq≤x[1] && return y[1]; xq≥x[end] && return y[end]
 function main()
     γ=γc; μ0=μ0c
     M0 = length(ARGS)≥1 ? parse(Float64,ARGS[1]) : M0_DEFAULT
-    zb,ρb,Pb=read_bg(joinpath(@__DIR__,"background_35deg.txt"))
+    zb,ρb,Pb=read_bg(joinpath(@__DIR__,"..","data","background_35deg.txt"))
     ρ0s=interp(0.,zb,ρb); P0s=interp(0.,zb,Pb); Hp=P0s/(ρ0s*gsurf)
     Lx=LXFRAC*Rstar; dxt=1e5*12/CPH
     Nx=round(Int,Lx/dxt); zlo=-4Hp; Lz=7Hp; Nz=max(64,round(Int,Lz/(Hp/CPH)))
@@ -51,7 +51,7 @@ function main()
     end
 
     label = get(ENV,"RUN_LABEL","paper_run_cont")
-    outdir=joinpath(@__DIR__,"..","output",label); mkpath(outdir)
+    outdir=joinpath(@__DIR__,"..","..","output",label); mkpath(outdir)
     writedlm(joinpath(outdir,"grid_x.txt"), collect(g.xc)./Rstar)
     writedlm(joinpath(outdir,"grid_z.txt"), [zpad(M.NG+j)/Hp for j in 1:Nz])
     tend=TEXTRA*(Nx*g.dx)/cf+τ; twin0=tend-WIN

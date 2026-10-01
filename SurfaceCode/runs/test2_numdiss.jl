@@ -27,8 +27,8 @@
 # Reported: the same ratio at the production resolution (dx=50 km) = the linear
 # contamination bound for that run.
 #
-# Usage: julia -t 4 SurfaceCode/test2_numdiss.jl
-include(joinpath(@__DIR__,"mhd2d.jl")); using .MHD2D; const M=MHD2D
+# Usage: julia -t 4 SurfaceCode/runs/test2_numdiss.jl
+include(joinpath(@__DIR__,"..","src","mhd2d.jl")); using .MHD2D; const M=MHD2D
 using Printf, DelimitedFiles
 
 function run_mode(; mode::Symbol=:fast, cpl::Int=32, vA_over_cs=1.0, nper=30, cfl=0.4)
@@ -71,7 +71,7 @@ end
 # ---- science-run mapping ------------------------------------------------------
 const Rstar=2.0*6.957e8; const Lmeas=0.006*Rstar; const τpulse=150.0
 cf_kms=8.296; dx_km=50.0
-meta=joinpath(@__DIR__,"..","output","paper_run_1kG","meta.txt")
+meta=joinpath(@__DIR__,"..","..","output","paper_run_1kG","meta.txt")
 if isfile(meta)
     for l in eachline(meta)
         startswith(l,"cf_kms=") && (global cf_kms=parse(Float64,split(l,"=")[2]))
@@ -84,7 +84,7 @@ cpl_sci=λsci/(dx_km*1e3)                               # its resolution in the 
 println("TEST 2 — numerical-dissipation calibration (ideal eigenmodes, analytic damping = 0)")
 @printf("  science pulse: λ≈2τc_f=%.0f km at dx=%.0f km → %.0f cells/λ;  measured L(Φ)=0.006 R⋆ = %.1f λ\n\n",
         λsci/1e3, dx_km, cpl_sci, Lmeas/λsci)
-outdir=joinpath(@__DIR__,"..","output","wavetests"); mkpath(outdir)
+outdir=joinpath(@__DIR__,"..","..","output","wavetests"); mkpath(outdir)
 results=Dict{Tuple{Symbol,Int},Float64}()
 tab=[]
 for mode in (:fast,:alfven)

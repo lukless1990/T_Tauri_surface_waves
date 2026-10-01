@@ -10,7 +10,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 here = os.path.dirname(__file__)
-d    = os.path.join(here, "..", "output", "wavetests")
+d    = os.path.join(here, "..", "..", "output", "wavetests")
 outd = os.path.join(here, "plots"); os.makedirs(outd, exist_ok=True)
 
 H=1.0; lam=H/4

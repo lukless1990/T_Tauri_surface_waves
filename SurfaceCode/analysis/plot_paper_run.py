@@ -6,14 +6,14 @@
 #   Fig B (flux_decay_0p1.png): height/time-integrated energy flux Phi(x)/Phi0 out to 0.1 R*, with an
 #     exponential fit (decay length L), the ambient convective-wave floor, and the pole marker.
 #
-# Usage: python SurfaceCode/plot_paper_run.py [n_panels]   (default 6; use "all" for every snapshot)
+# Usage: python SurfaceCode/analysis/plot_paper_run.py [n_panels]   (default 6; use "all" for every snapshot)
 import numpy as np, matplotlib, os, glob, sys
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.colors import TwoSlopeNorm
 
 label = os.environ.get("RUN_LABEL", "paper_run")            # data subdir (RUN_LABEL=paper_run_1kG etc.)
-d   = os.path.join(os.path.dirname(__file__), "..", "output", label)
+d   = os.path.join(os.path.dirname(__file__),"..","..","output", label)
 outd= os.path.join(os.path.dirname(__file__), "plots"); os.makedirs(outd, exist_ok=True)
 Rstar_pole = 0.61                                  # ring->pole transit in R*
 

@@ -7,7 +7,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 here = os.path.dirname(__file__)
-d    = os.path.join(here, "..", "output", "shocktests")
+d    = os.path.join(here, "..", "..", "output", "shocktests")
 outd = os.path.join(here, "plots"); os.makedirs(outd, exist_ok=True)
 
 # ---------- exact Sod Riemann solution (Toro) ----------

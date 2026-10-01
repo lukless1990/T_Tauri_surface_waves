@@ -10,8 +10,8 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import SymLogNorm
 
 here = os.path.dirname(__file__)
-dc   = os.path.join(here, "..", "output", "paper_run_cont")
-dp   = os.path.join(here, "..", "output", "paper_run_1kG")   # single-pulse run (1 kG, same field as the cont run)
+dc   = os.path.join(here, "..", "..", "output", "paper_run_cont")
+dp   = os.path.join(here, "..", "..", "output", "paper_run_1kG")   # single-pulse run (1 kG, same field as the cont run)
 outd = os.path.join(here, "plots"); os.makedirs(outd, exist_ok=True)
 pole = 0.61
 

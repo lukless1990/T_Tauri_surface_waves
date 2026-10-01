@@ -38,7 +38,7 @@ def savefig(fig, name):
     print("wrote", name)
 
 # ================================================================ Fig: background
-bg = np.loadtxt(os.path.join(sc, "background_35deg.txt"))
+bg = np.loadtxt(os.path.join(sc, "data", "background_35deg.txt"))
 zb, rho, T, P, VA1, cs, Hp = bg[:,0], bg[:,2], bg[:,3], bg[:,4], bg[:,11], bg[:,12], bg[:,13]
 Hp0 = 8.396e5                                              # Hp at z=0 [m] (paper-run meta)
 zH  = zb / Hp0
@@ -253,9 +253,9 @@ savefig(fig, "fig_cont.pdf")
 # ================================================================ Appendix: shock tubes (2-col)
 dS = os.path.join(odat, "shocktests")
 import importlib.util
-spec = importlib.util.spec_from_file_location("pst", os.path.join(sc, "plot_shocktests.py"))
+spec = importlib.util.spec_from_file_location("pst", os.path.join(sc, "analysis", "plot_shocktests.py"))
 # reuse the exact Sod Riemann solver from the exploratory plotter without executing its __main__
-src = open(os.path.join(sc, "plot_shocktests.py")).read()
+src = open(os.path.join(sc, "analysis", "plot_shocktests.py")).read()
 sod_src = src[src.index("def sod_exact"):src.index("# ---------- Fig 1")]
 ns_ = {"np": np}; exec(sod_src, ns_); sod_exact = ns_["sod_exact"]
 

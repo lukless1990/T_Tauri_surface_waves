@@ -18,8 +18,8 @@
 #     rewrite of a validated solver.
 # Decomposes step_grav! into its phases at the real production grid, plus the driver-level
 # diagnostic (the Phi(x) flux accumulation in paper_run.jl, which runs every step).
-# Usage: julia -t 14 --project=. SurfaceCode/profile_step.jl [Nx] [Nz]
-include(joinpath(@__DIR__,"mhd2d.jl")); using .MHD2D; const M=MHD2D
+# Usage: julia -t 14 --project=. SurfaceCode/runs/profile_step.jl [Nx] [Nz]
+include(joinpath(@__DIR__,"..","src","mhd2d.jl")); using .MHD2D; const M=MHD2D
 using Printf, DelimitedFiles
 using Base.Threads: @threads
 const Gc=6.674e-11; const Msun=1.989e30; const Rsun=6.957e8
@@ -33,7 +33,7 @@ function interp(xq,x,y); xq≤x[1] && return y[1]; xq≥x[end] && return y[end]
 Nx = length(ARGS)≥1 ? parse(Int,ARGS[1]) : 2783
 Nz = length(ARGS)≥2 ? parse(Int,ARGS[2]) : 168
 γ=γc; μ0=μ0c
-zb,ρb,Pb=read_bg(joinpath(@__DIR__,"background_35deg.txt"))
+zb,ρb,Pb=read_bg(joinpath(@__DIR__,"..","data","background_35deg.txt"))
 ρ0s=interp(0.,zb,ρb); P0s=interp(0.,zb,Pb); Hp=P0s/(ρ0s*gsurf)
 Lx=0.1*Rstar; zlo=-4Hp; Lz=7Hp
 g=M.Grid(Nx,Nz,Lx,Lz; z0=zlo); zpad(j)=zlo+(j-M.NG-0.5)*g.dz

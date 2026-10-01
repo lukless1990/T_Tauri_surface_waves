@@ -1,6 +1,6 @@
 # stage4_viz.jl — run one MHD fast-mode pulse and dump Φ(x) + 2D v_x snapshots for plotting.
 # (Everything inside main() — top-level loops in Julia are type-unstable and slow.)
-include(joinpath(@__DIR__,"mhd2d.jl")); using .MHD2D; const M=MHD2D
+include(joinpath(@__DIR__,"..","src","mhd2d.jl")); using .MHD2D; const M=MHD2D
 using Printf, DelimitedFiles
 using Base.Threads: @threads
 const Gc=6.674e-11; const Msun=1.989e30; const Rsun=6.957e8
@@ -15,7 +15,7 @@ function main()
     γ=γc; μ0=μ0c
     Lxfrac = length(ARGS)≥1 ? parse(Float64,ARGS[1]) : 0.036   # x-domain in R⋆
     cph    = length(ARGS)≥2 ? parse(Int,ARGS[2])     : 12      # cells per H_p (12=res×1, 24=res×2)
-    zb,ρb,Pb=read_bg(joinpath(@__DIR__,"background_35deg.txt"))
+    zb,ρb,Pb=read_bg(joinpath(@__DIR__,"..","data","background_35deg.txt"))
     ρ0s=interp(0.,zb,ρb); P0s=interp(0.,zb,Pb); Hp=P0s/(ρ0s*gsurf)
     Lx=Lxfrac*Rstar; dxt=1e5*12/cph                            # dx: 100 km (res×1) / 50 km (res×2)
     Nx=round(Int,Lx/dxt); zlo=-4Hp; Lz=7Hp; Nz=max(64,round(Int,Lz/(Hp/cph)))
@@ -33,7 +33,7 @@ function main()
         @inbounds for j in 1:gg.Nz+2M.NG,k in 1:M.NG; il=M.NG+1-k; ρ=aa.ρ0[j]; ux=vx*zw(j)
             c=M.cons(γ,μ0,ρ,ux,0.,0.,aa.Bx0[j],0.,aa.Bz0,aa.p0[j],0.); for m in 1:M.NVAR; U[m,il,j]=c[m]; end; end
     end
-    outdir=joinpath(@__DIR__,"..","output","plots","surfacecode"); mkpath(outdir)
+    outdir=joinpath(@__DIR__,"..","..","output","plots","surfacecode"); mkpath(outdir)
     writedlm(joinpath(outdir,"viz_x.txt"), collect(g.xc)./Rstar)
     writedlm(joinpath(outdir,"viz_z.txt"), [zpad(M.NG+j)/Hp for j in 1:Nz])
     save2d(tag)=writedlm(joinpath(outdir,"viz_vx_$tag.txt"),

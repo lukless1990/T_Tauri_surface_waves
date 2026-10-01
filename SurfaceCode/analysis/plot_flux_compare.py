@@ -20,7 +20,7 @@ runs = [("paper_run_1kG",   "tab:blue", "1 kG"),
 v_amb = 0.28
 
 def load(lbl):
-    dd = os.path.join(here, "..", "output", lbl)
+    dd = os.path.join(here, "..", "..", "output", lbl)
     x, phi = np.loadtxt(os.path.join(dd, "flux_final.txt")).T
     pk = np.atleast_2d(np.loadtxt(os.path.join(dd, "snap_times.txt")))[:, 1]
     meta = dict(l.split("=") for l in open(os.path.join(dd, "meta.txt")).read().split() if "=" in l)

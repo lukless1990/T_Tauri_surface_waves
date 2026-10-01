@@ -25,7 +25,7 @@ runs = [("paper_run_1kG",   "tab:blue", r"$\tau = 150$ s (production)"),
         ("paper_run_tau50", "tab:orange", r"$\tau = 50$ s (clump-consistent)")]
 
 def load(lbl):
-    d = os.path.join(here, "..", "output", lbl)
+    d = os.path.join(here, "..", "..", "output", lbl)
     xf, phi = np.loadtxt(os.path.join(d, "flux_final.txt")).T
     pk = np.atleast_2d(np.loadtxt(os.path.join(d, "snap_times.txt")))[:, 1]
     meta = dict(l.split("=") for l in open(os.path.join(d, "meta.txt")).read().split() if "=" in l)

@@ -1,12 +1,12 @@
 # run_shocktests.jl — dump the two solver-validation shock tubes for the appendix figures.
 #   Sod (hydro, Patch2D): x, rho, u, p at t=0.2 (Nx=200).  Exact solution added in the plotter.
 #   Brio-Wu (MHD, MHD2D):  x, rho, vx, p, By at t=0.1, at Nx=400 (fiducial) and Nx=1600 (reference).
-include(joinpath(@__DIR__,"patch2d.jl")); using .Patch2D
-include(joinpath(@__DIR__,"mhd2d.jl"));   using .MHD2D
+include(joinpath(@__DIR__,"..","src","patch2d.jl")); using .Patch2D
+include(joinpath(@__DIR__,"..","src","mhd2d.jl"));   using .MHD2D
 using DelimitedFiles, Printf
 const P=Patch2D; const M=MHD2D
 
-outdir=joinpath(@__DIR__,"..","output","shocktests"); mkpath(outdir)
+outdir=joinpath(@__DIR__,"..","..","output","shocktests"); mkpath(outdir)
 
 # ---- Sod (hydro) ----
 xs,ρs,ps,us,ns,t = P.sod(Nx=200)

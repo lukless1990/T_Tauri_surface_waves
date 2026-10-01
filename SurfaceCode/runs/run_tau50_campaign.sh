@@ -13,8 +13,8 @@
 # tau=150 data is left in place (output/paper_run_{1kG,0p1kG,cont}) — it is the comparison
 # data for the driver-duration null reported in Sect. 4.3.
 set -u
-cd "$(dirname "$0")/.."   # parent of SurfaceCode/ (scripts are run as SurfaceCode/...)
-SC=SurfaceCode
+cd "$(dirname "$0")/../.."   # repository root (scripts are run as SurfaceCode/runs/...)
+SC=SurfaceCode/runs
 T=50
 NT=14
 TARGET=10.10          # launched-peak target [km/s]: match the 1 kG tau=50 run exactly

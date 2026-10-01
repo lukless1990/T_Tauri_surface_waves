@@ -1,5 +1,5 @@
-# quick allocation + timing probe for the MHD step (run: julia -t N SurfaceCode/bench.jl)
-include(joinpath(@__DIR__,"mhd2d.jl")); using .MHD2D; const M=MHD2D; using Printf
+# quick allocation + timing probe for the MHD step (run: julia -t N SurfaceCode/runs/bench.jl)
+include(joinpath(@__DIR__,"..","src","mhd2d.jl")); using .MHD2D; const M=MHD2D; using Printf
 γ=5/3; μ0=1.0; N=128; g=M.Grid(N,N,1.0,4.0)
 zpad(j)=(j-M.NG-0.5)*g.dz
 ρ0=[exp(-zpad(j)) for j in 1:N+2M.NG]; p0=[exp(-zpad(j)) for j in 1:N+2M.NG]
