@@ -1,5 +1,7 @@
 # SurfaceCode
 
+> **Note:** This code is research software under active development. It has been validated for the setups described in the paper, but it may still contain errors or limitations, and interfaces may change. Please check results carefully, and feel free to report issues.
+
 Explicit 2.5D ideal-MHD patch code for the near-surface layers of a classical T Tauri star,
 used to test whether accretion-generated fast-mode waves can travel along the stellar surface
 from the accretion ring to the polar wind base (the transport assumption of the
